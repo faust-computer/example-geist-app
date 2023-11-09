@@ -6,3 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+eyre = "0.6.8"
+geist_common = "0.1.9"
+log = "0.4.20"
+roslibrust = "0.8.0"
+simple_logger = "4.2.0"
+tokio = "1.33.0"
