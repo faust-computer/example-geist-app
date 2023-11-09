@@ -4,6 +4,8 @@ use log;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use geist_common::common::{
+    Inputs,
+    ContractOpMode,
     CreateProofRequest,
     CreateProofResponse,
     RecordTopicDataRequest,
@@ -33,7 +35,7 @@ async fn main() -> Result<(), Error> {
     log::info!("proof res: {:?}", proof_res);
 
     // call contract call service
-    // call_contract_call_service(client_arc.clone(), proof).await;
+    call_contract_call_service(client_arc.clone(), proof_res.unwrap()).await;
 
     Ok(())
 }
@@ -68,7 +70,7 @@ async fn call_record_topic_service(client: Arc<Mutex<ClientHandle>>) -> Result<S
 }
 
 /// call create proof service
-async fn call_create_proof_service(client: Arc<Mutex<ClientHandle>>, target_path: String) {
+async fn call_create_proof_service(client: Arc<Mutex<ClientHandle>>, target_path: String) -> Result<String, Error> {
     let client = client.lock().await;
 
     let new_target_path = target_path.clone() + "/bag_0.db3";
@@ -88,36 +90,37 @@ async fn call_create_proof_service(client: Arc<Mutex<ClientHandle>>, target_path
         .expect("Error while calling get hello world service");
 
     log::info!("result: {:?}", result);
+
+    Ok(result.proof)
 }
 
 async fn call_contract_call_service(client: Arc<Mutex<ClientHandle>>, proof: String) {
     let client = client.lock().await;
 
-//     let request = ContractCallRequest {
-//         header: time.now(),
-//         path: "./aes_sedai/artifacts/SimpleNFT.abi.json",
-//         address: "0x5FbDB2315678afecb367f032d93F642f64180aa3", // contract address on sepolia
-//         method: "mintNFT",
-//         op: 0
-//         chain_id: 11155111,
-//             inputs: {
-//             vec![
-//                 Inputs {
-//                     key : "String",
-//                     value : "New Token",
-//                 }
-//             ]
-//         }
-//     };
+    let request = ContractCallRequest {
+        path: "SimpleNFT.abi.json".to_string(),
+        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3".to_string(), 
+        method: "mintNFT".to_string(),
+        op: ContractOpMode {
+            mode: ContractOpMode::SET,
+        },
+        chain_id: 11155111,
+        inputs: vec![
+            Inputs {
+                key: "String".to_string(),
+                value: "New Token".to_string(),
+            }
+        ],
+        output: "".to_string(),
+    };
+    log::info!("request: {:?}", request);
+    let result = client
+        .call_service::<ContractCallRequest, ContractCallResponse>(
+            "/onchain/contract_call",
+            request,
+        )
+        .await
+        .expect("Error while calling get hello world service");
 
-//     log::info!("request: {:?}", request);
-//     let result = client
-//         .call_service::<ContractCallRequest, ContractCallResponse>(
-//             "/onchain/contract_call",
-//             request,
-//         )
-//         .await
-//         .expect("Error while calling get hello world service");
-
-//     log::info!("result: {:?}", result);
+    log::info!("result: {:?}", result);
 }
