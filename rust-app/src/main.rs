@@ -14,6 +14,16 @@ use geist_common::common::{
     ContractCallResponse,
 };
 
+#[cfg(target_os = "linux")]
+fn get_ip_address() -> String {
+    "localhost".to_string()
+}
+
+#[cfg(target_os = "macos")]
+fn get_ip_address() -> String {
+   "172.17.0.2".to_string()
+}
+
 #[tokio::main(flavor = "multi_thread")]
 async fn main() -> Result<(), Error> {
     simple_logger::SimpleLogger::new()
@@ -22,7 +32,8 @@ async fn main() -> Result<(), Error> {
         .init()
         .unwrap();
 
-    let client = ClientHandle::new("ws://localhost:9091").await?;
+    let url = format!("ws://{}:9091", get_ip_address());
+    let client = ClientHandle::new(url).await?;
     let client_arc = Arc::new(Mutex::new(client));
 
     // first call service once
