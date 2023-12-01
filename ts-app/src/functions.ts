@@ -25,13 +25,37 @@ export function subscribe<T>(ros: ROSLIB.Ros, topicName: string, messageType: st
 }
 
 // Call a service
-export async function callService<T>(ros: ROSLIB.Ros, serviceName: string, serviceType: string, requestData: any, callback: (result: T) => void): Promise<void> {
-    const service = new ROSLIB.Service({
-        ros,
-        name: serviceName,
-        serviceType
-    });
+export async function callService<T>(
+    ros: ROSLIB.Ros, 
+    serviceName: string, 
+    serviceType: string, 
+    requestData: any, 
+    callback: (result: T) => void,
+    errorCallback?: (error: any) => void
+): Promise<void> {
+    try {
+        const service = new ROSLIB.Service({
+            ros,
+            name: serviceName,
+            serviceType
+        });
 
-    const request = new ROSLIB.ServiceRequest(requestData);
-    service.callService(request, callback);
+        const request = new ROSLIB.ServiceRequest(requestData);
+
+        service.callService(request, (result) => {
+            callback(result);
+        }, (error) => {
+            if (errorCallback) {
+                errorCallback(error);
+            } else {
+                console.error("Service call failed: ", error);
+            }
+        });
+    } catch (error) {
+        if (errorCallback) {
+            errorCallback(error);
+        } else {
+            console.error("Error during service setup or execution: ", error);
+        }
+    }
 }
