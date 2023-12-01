@@ -31,11 +31,16 @@ const listener = subscribe<IMsgsGpsData>(
   }
 );
 
+// setup pwd
+const pwd = process.env.PWD;
+const target_path = pwd + "/bags";
+console.log(`pwd: ${target_path}`);
+
 const recordTopicDataRequest = {
   topic: topicName,
-  duration: 10,
-  target_path : "../bags",
-  max_record_count: 20,
+  duration: 5,
+  target_path : target_path,
+  max_record_count: 10,
   storage_medium: 0, // 0 = rosbag
 };
 
@@ -48,8 +53,9 @@ const recordTopicService = callService<IServiceMsgsRecordTopicDataResponse>(
   recordTopicType,
   recordTopicDataRequest,
   (response) => {
-    console.log(`Response for service call:
-    Success: ${response.success}`);
+    console.log(`Response for record_topic_data service call:
+    Success: ${response.success}
+    Message: ${response.message}}`);
   }
 );
 
