@@ -115,7 +115,7 @@ async fn call_contract_call_service(client: Arc<Mutex<ClientHandle>>, proof: Str
         op: ContractOpMode {
             mode: ContractOpMode::SET,
         },
-        chain_id: 11155111,
+        chain_id: 31337, // anvil chain_id
         inputs: vec![
             Inputs {
                 key: "String".to_string(),
